@@ -12,7 +12,7 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   String input = "";
   String result = "";
-  bool lastPressedEquals = false; // Tracks if last press was "="
+  bool lastPressedEquals = false;
 
   void buttonPressed(String value) {
     setState(() {
@@ -21,26 +21,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         result = "";
         lastPressedEquals = false;
       } else if (value == '⌫') {
-        if (input.isNotEmpty) {
-          input = input.substring(0, input.length - 1);
-        }
+        if (input.isNotEmpty) input = input.substring(0, input.length - 1);
       } else if (value == '=') {
         if (input.isNotEmpty) {
           result = calculateResult(input);
           lastPressedEquals = true;
         }
       } else {
-        // If last pressed "=" and new input is an operator, continue from result
         if (lastPressedEquals) {
           if (isOperator(value)) {
             input = result + value;
           } else {
-            input = value; // start new calculation
+            input = value;
             result = "";
           }
           lastPressedEquals = false;
         } else {
-          // Prevent multiple operators in a row
           if (input.isNotEmpty &&
               isOperator(input[input.length - 1]) &&
               isOperator(value)) {
@@ -59,10 +55,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   String calculateResult(String exp) {
     try {
-      // Replace symbols
       exp = exp.replaceAll('×', '*').replaceAll('x', '*').replaceAll('÷', '/');
-
-      // Replace % with /100
       exp = exp.replaceAll('%', '/100');
 
       Parser p = Parser();
@@ -71,11 +64,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
       double eval = parsedExp.evaluate(EvaluationType.REAL, cm);
 
-      // Remove ".0" for integers
-      if (eval == eval.toInt()) {
-        return eval.toInt().toString();
-      }
-
+      if (eval == eval.toInt()) return eval.toInt().toString();
       return eval.toString();
     } catch (e) {
       return "Error";
@@ -87,44 +76,61 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // Input Display
+          const SizedBox(height: 100),
+
+          // Big Rectangle for input + result
           Container(
-            alignment: Alignment.centerRight,
+            margin: const EdgeInsets.all(20),
             padding: const EdgeInsets.all(20),
-            child: Text(
-              input,
-              style: const TextStyle(color: Colors.white, fontSize: 36),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.green, width: 2),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  input,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  result,
+                  style: const TextStyle(
+                    color: Color.fromARGB(255, 239, 242, 239),
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // Result Display
-          Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              result,
-              style: const TextStyle(color: Colors.green, fontSize: 45),
-            ),
-          ),
+          const SizedBox(height: 100),
 
-          const SizedBox(height: 20),
-
-          // Buttons Grid
+          // Buttons grid (all same style)
           Expanded(
             child: GridView.count(
               crossAxisCount: 4,
               padding: const EdgeInsets.all(10),
+              childAspectRatio: 1.2,
               children: [
                 CalculatorButton(
                   text: "C",
-                  color: const Color.fromARGB(255, 231, 43, 29),
+                  color: Colors.red, // custom color
                   onTap: buttonPressed,
                 ),
                 CalculatorButton(
                   text: "⌫",
-                  color: const Color.fromARGB(255, 197, 52, 52),
+                  color: Colors.orange, // custom color
                   onTap: buttonPressed,
                 ),
                 CalculatorButton(
@@ -208,14 +214,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 CalculatorButton(
                   text: ".",
-                  color: const Color.fromARGB(255, 152, 128, 128)!,
+                  color: Colors.grey[850]!,
                   onTap: buttonPressed,
                 ),
                 CalculatorButton(
                   text: "=",
-                  color: const Color.fromARGB(255, 30, 197, 35),
+                  color: Colors.lightGreen,
                   onTap: buttonPressed,
                 ),
+                const SizedBox(), // empty to balance grid
               ],
             ),
           ),
